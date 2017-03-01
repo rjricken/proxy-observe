@@ -8,8 +8,10 @@ function observe(object, callback, acceptList) {
    acceptList = acceptList || ['add', 'update', 'delete', 'reconfigure', 'setPrototype', 'preventExtensions'];
 
    //TODO: improve how we dispatch the stream of changes to the callback
-   function dispatch(change) {
-      callback([change]);
+   function dispatch(type, change) {
+      if (acceptList.includes(type)) {
+         callback([Object.assign(change, { type })]);
+      }      
    }
 
    return new Proxy(object, {
@@ -22,27 +24,21 @@ function observe(object, callback, acceptList) {
             let oldValue = target[property];
             target[property] = value;
 
-            if (acceptList.includes('update')) {
-               dispatch({
-                  name: property,
-                  object: target,
-                  type: 'update',
-                  oldValue: oldValue
-               });
-            }
+            dispatch('update', {
+               name: property,
+               object: target,
+               oldValue: oldValue
+            });
          }
 
          // adding a new property
          else {
             target[property] = value;
 
-            if (acceptList.includes('add')) {
-               dispatch({
-                  name: property,
-                  object: target,
-                  type: 'add'
-               });
-            }
+            dispatch('add', {
+               name: property,
+               object: target
+            });
          }
 
          return true;
@@ -52,13 +48,10 @@ function observe(object, callback, acceptList) {
       deleteProperty: (target, property) => {
          delete target[property];
 
-         if (acceptList.includes('delete')) {
-            dispatch({
-               name: property,
-               object: target,
-               type: 'delete'
-            });
-         }        
+         dispatch('delete', {
+            name: property,
+            object: target,
+         });
 
          return true;
       }
