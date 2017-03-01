@@ -1,0 +1,25 @@
+{
+  "name": "proxy-observe",
+  "version": "0.1.0",
+  "description": "A Proxy based implementation of the now dead Object.observe",
+  "main": "index.js",
+  "private": false,
+  "engines": {
+    "node": ">=6.6.x",
+    "npm": ">=3.10.x"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "javascript",
+    "observer",
+    "proxy"
+  ],
+  "author": "Ricardo J. Ricken <ricardoricken@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.2.0"
+  }
+}
