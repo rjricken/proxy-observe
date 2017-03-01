@@ -13,17 +13,23 @@ describe('Object.observe', function() {
    });
 
    describe('General behavior', function() {
-      it('should observe changes to a single property in the original object', function(done) {
+      function checkChange(change, expectedType, expectedProperties) {
+         expect(change).to.have.property('type', expectedType);
+         expect(change).to.have.property('object');
+
+         for (let property in expectedProperties) {
+            expect(change).to.have.property(property, expectedProperties[property]);
+         }
+      }
+
+      it('should notify changes in the value of a property', function(done) {
          let obj = { id: 1, name: 'Peter', age: 23 };
 
          let observable = Object.observe(obj, (changes) => {
             expect(changes).to.have.length(1);
 
             const singleChange = changes[0];
-            expect(singleChange).to.have.property('type', 'update');
-            expect(singleChange).to.have.property('name', 'name');
-            expect(singleChange).to.have.property('oldValue', 'Peter');
-            expect(singleChange).to.have.property('object');
+            checkChange(singleChange, 'update', { name: 'name', oldValue: 'Peter' });
             expect(singleChange.object).to.have.property('name', 'Brad');
 
             done();
@@ -32,16 +38,14 @@ describe('Object.observe', function() {
          observable.name = 'Brad';
       });
 
-      it('should observe the creation of a new property in the original object', function(done) {
+      it('should notify the creation of new properties', function(done) {
          let obj = { id: 1, name: 'Peter', age: 23 };
 
          let observable = Object.observe(obj, (changes) => {
             expect(changes).to.have.length(1);
 
             const singleChange = changes[0];
-            expect(singleChange).to.have.property('type', 'add');
-            expect(singleChange).to.have.property('name', 'job');
-            expect(singleChange).to.have.property('object');
+            checkChange(singleChange, 'add', { name: 'job' });
             expect(singleChange.object).to.have.property('job', 'Engineer');
 
             done();
@@ -50,16 +54,14 @@ describe('Object.observe', function() {
          observable.job = 'Engineer';
       });
 
-      it('should observe the deletion of a single property in the original object', function(done) {
+      it('should notify the deletion of a property', function(done) {
          let obj = { id: 1, name: 'Peter', age: 23 };
 
          let observable = Object.observe(obj, (changes) => {
             expect(changes).to.have.length(1);
 
             const singleChange = changes[0];
-            expect(singleChange).to.have.property('type', 'delete');
-            expect(singleChange).to.have.property('name', 'age');
-            expect(singleChange).to.have.property('object');
+            checkChange(singleChange, 'delete', { name: 'age' });
             expect(singleChange.object).to.not.have.property('age');
 
             done();
@@ -67,5 +69,20 @@ describe('Object.observe', function() {
 
          delete observable.age;
       });
+
+      it('should notify the reconfiguration of a property', function(done) {
+         let obj = { id: 1, name: 'Peter', age: 23 };
+
+         let observable = Object.observe(obj, (changes) => {
+            expect(changes).to.have.length(1);
+
+            const singleChange = changes[0];
+            checkChange(singleChange, 'reconfigure', { name: 'id' });
+
+            done();
+         });
+
+         Object.defineProperty(observable, 'id', { writable: false });
+      })
    });
 });

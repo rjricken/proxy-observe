@@ -54,6 +54,18 @@ function observe(object, callback, acceptList) {
          });
 
          return true;
+      },
+
+      // reconfiguring a property
+      defineProperty: (target, property, descriptor) => {
+         Object.defineProperty(target, property, descriptor);
+
+         dispatch('reconfigure', {
+            name: property,
+            object: target
+         });
+
+         return true;
       }
    });
 }
