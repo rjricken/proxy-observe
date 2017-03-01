@@ -66,6 +66,16 @@ function observe(object, callback, acceptList) {
          });
 
          return true;
+      },
+
+      preventExtensions: (target) => {
+         Object.preventExtensions(target);
+
+         dispatch('preventExtensions', {
+            object: target
+         });
+
+         return true;
       }
    });
 }

@@ -83,6 +83,27 @@ describe('Object.observe', function() {
          });
 
          Object.defineProperty(observable, 'id', { writable: false });
-      })
+      });
+
+      it('should notify correctly after calling Object.seal');
+
+      it('should notify (incorrectly for now) after calling Object.seal', function (done) {
+         let obj = { id: 1, name: 'Peter', age: 23 };
+         let allChanges = [];
+
+         let observable = Object.observe(obj, (changes) => {
+            allChanges.push(changes[0]);
+         });
+
+         Object.seal(observable);
+         
+         expect(allChanges).to.have.length(4);
+         checkChange(allChanges[0], 'preventExtensions');
+         checkChange(allChanges[1], 'reconfigure');
+         checkChange(allChanges[2], 'reconfigure');
+         checkChange(allChanges[3], 'reconfigure');
+         
+         done();
+      });
    });
 });
